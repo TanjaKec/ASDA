@@ -1,0 +1,683 @@
+---
+title: "Case Study: how to use R"
+author: "Tanja and Neil"
+date: "09/03/2020"
+output: 
+  html_document:
+    theme: yeti
+    highlight: kate
+    toc: true
+    toc_float: true
+    df_print: paged
+    code_folding: show
+#    number_sections: true
+---
+
+```{r setup, include=FALSE, message = FALSE, warning = FALSE}
+knitr::opts_chunk$set(echo = TRUE,
+                      include=TRUE,
+                      prompt = TRUE,
+                      message = FALSE,
+                      warning = FALSE,
+                      fig.height = 5,
+                      fig.width = 7,
+                      cache = FALSE)
+```
+
+Open data belongs to everyone; it empowers people to make informed decisions that are not clouded by misinformation, rumour and gossip. To be able to identify the underlying facts within data sets it’s crucial that individuals and communities possess the necessary skills. Open data is often inconsistent and limited and requires a significant amount of time to organise and structure for presentation. 
+
+This is a data analysis report concerning the visualisation of the COVID-19 virus within the United Kingdom and Europe. All of the report is created with [R](https://www.r-project.org). It represents a case study as an illustration of the concepts presented at the workshop on basic R for data analysts. To learn how to use R and develop a report like this visit [Website with the workshop material](https://www.geolytix.co.uk). <https://www.datadreaming.org/post/r-markdown-theme-gallery/>
+
+# Covid-19: Open Data
+
+The novel coronavirus disease 2019 (COVID-19) was first reported in Wuhan, China, where the initial wave of intense community transmissions was cut short by interventions.
+
+```{r Wuhan}
+# If you don't have the "leaflet" package installed yet, uncomment and run the line below
+#install.packages("leaflet")
+library(leaflet)
+# Initialize and assign us as the leaflet object
+leaflet() %>%
+  # add tiles to the leaflet object
+  addTiles() %>%  
+  # setting the centre of the map and the zoom level
+  setView(lng = 114.3055, lat = 30.5928 , zoom = 10) %>%
+  # add a popup marker 
+  addMarkers(lng = 114.3055, lat = 30.5928, popup = "<b>Wuhan, capital of Central China’s Hubei province</b><br><a href='https://www.ft.com/content/82574e3d-1633-48ad-8afb-71ebb3fe3dee'>China and Covid-19: what went wrong in Wuhan?</a>")
+```
+
+The practice has shown that for a public health intervention to be successful the effort from the governmental authorities need to be put into:
+
+- identifying the infected and bringing them to treatments 
+- locate and quarantine all those who had contact with the infected 
+- sterilise environmental pathogens 
+- promote use of mask and social distancing
+- release to the public number of infected and deaths on a daily basis through open data
+
+The importance of hands washing, wearing a mask and social distancing as a tool to limit disease transmission is well recognised, but nonetheless ensuring social distancing especially in densely populated urban areas is still challenging. Well educated communities are critical for an effective response and for the prevention of the local outbreaks. Sharing of factual information that can be understood and trusted by the communities in bringing about a change in their behaviour to implement efficiently desired public health actions is the must. Trust and transparency are fundamental to obtain absolute public engagement. By publishing daily figures of infection spread that can be freely analysed and scrutinise can helps in engaging communities and obtaining its willing and continued support in controlling the spread of infection. 
+
+## Working with DB in R
+
+In the big organisations data are often kept in a database and data you wish to access from it might be too large to fit into the memory of your computer. Connecting from R to a database to access necessary data for an analysis can be very useful as it will allows you to fetch only the chunks needed for the current study. R allows you to access and query database without having to download the data contained in it. The two most common methods of connection are:
+
+- **Option 1)**
+    * the `RODBC` package: uses slightly older code; it can be used to connect to anything that uses ODBC.
+```{r, eval=FALSE}
+library("RODBC")
+# Connection with a server called "Walmart" and a database called "Asda":
+RODBC_connection <- odbcDriverConnect('driver = {SQL Server};
+                                      server = Walmart;
+                                      database = Asda;
+                                      trusted_connection = true') #passes your windows credentials to the server; can also specify a username `uid` and a password `pwd`
+dt1 <- sqlFetch(channel = RODBC_connection, sqtable = "MyTable")
+```
+
+Using `RODBC` you can write back to database tables, choosing to append or not:
+```{r, eval=FALSE}
+sqlSave(channel = RODBC_connection,
+        dat = dt2, 
+        tablename = "MyTable_R_version",
+        append = FALSE,
+        safer = FALSE)
+```
+
+When you finish working using the database you should disconnect from the server.
+```{r, eval=FALSE}
+odbcClose(RODBC_connection)
+```
+
+One of the author of this package is the famus statsistican [Brian Ripley](https://en.wikipedia.org/wiki/Brian_D._Ripley), and you can find more about the possibilities it offers by playing around with it using the guidance from [RDocumentation on RODBC v1.3-17](https://www.rdocumentation.org/packages/RODBC/versions/1.3-17). 
+
+- **Option 2)** 
+    * the `DBI` package: a common database interface in R; can be used with different 'back-end' drivers such as MySQL, SQL Server, SQLite, Oracle etc; to write SQL it can be used on it's own:
+```{r, eval=FALSE}
+# Can write an SQL query directly using the `dbSendQuery` function
+# Executes the query on the server-side only, but if you want the results back in R, you need to use `dbFetch`
+SomeRecords <- dbFetch(dbSendQuery(DBI_Connection, 
+                                   "SELECT CustomerName_column, City_column FROM Customers_Table")) 
+```    
+  You can also write back to a database using the `dbWriteTable` function.
+```{r, eval =FALSE}
+#Writing a new table called 'Table_created_in_R' using the R data.frame called "my_df", with `append` and `overwrite` options
+dbWriteTable(DBI_Connection,"Table_created_in_R", my_df, overwrite = TRUE)
+```
+  We use `tbl()` to define a table as if it was part of the R work-space, and specify as the function's arguments the connection object and the name of the table in the database.
+```{r, eval=FALSE}
+MyTable_Rws <- tbl(DBI_Connection, "MyTable_DB")
+```
+If we need to pull the data from the server into R's memory we can use the `collect()` function. 
+
+The `DBI` package can be combined with:
+    * the `dplyr` package: to make the `tbl`s and to work on them using the `dplyr` syntax
+    * the `dbplyr` package: allows translation of SQL to dplyr
+    * the `odbc`package: provides the odbc drivers, but you could use the functions below with other drivers instead
+```{r, eval=FALSE}    
+    DBI_Connection <- dbConnect(odbc(), 
+                                driver = "SQL Server",
+                                server = Sys.getenv("SERVER"),
+                                database = Sys.getenv("DATABASE")
+)
+```
+
+With the waive of `tidy verse` evangelist the second option has become more popular as it allow to convert SQL into R using the `dplyr` commands chained with the pipe (` %>% `) operator. `dplyr` can translate many different query types into SQL. We can use it to do fairly complex queries without translation in just a few lines and obtain the results even though the data are still in the databas. 
+
+
+Useful DBI commands
+
+| **Command**      | **Summary**                                             |
+| ---------------- | ---------------------------------------------------------|
+| `dbConnect()`    |	Create a DBI connection object                          |
+| `dbListTables()` |	List the tables on the connection                       |
+| `dbListFields()` |	List the fields for a given table on a given connection |
+| `dbSendQuery()`  |	Send a query to execute on the server/connection        |
+| `dbFetch()`      |	Fetch the results from the server/connection            |
+| `dbWriteTable()` |	Write a table to the connection                         |
+| `tbl()`          |	Set a table on the connection as a `tibble` for `dplyr` |
+| `glimpse()`      |	See a summary of the rows, data types and top rows      |
+
+
+
+## Reading Data
+	
+[European Centre for Disease Prevention and Control](https://www.ecdc.europa.eu/en/publications-data/download-todays-data-geographic-distribution-covid-19-cases-worldwide) provides daily update of new reported cases of COVID-19 by country worldwide. The downloadable data file is updated daily and contains the latest available public data on COVID-19. Each row/entry contains the number of new cases reported per country and per day (with a lag of a day).
+
+<https://www.ecdc.europa.eu/en/publications-data/download-data-response-measures-covid-19>
+
+<https://www.ecdc.europa.eu/en/cases-2019-ncov-eueea>
+
+We will start the analysis by uploading the necessary packages and data into R. If you have not got the packages used in the following code, you will need to uncomment the first line (delete the `#` symbol) in the code below.
+
+```{r read_ecdc_data}
+#install.packages(c("dplyr", "stringr")) # install multiple packages by passing a vector of package names to the function; this function will install the requested packages, along with any of their non-optional dependencies
+suppressPackageStartupMessages(library(readxl)) 
+suppressPackageStartupMessages(library(tidyverse))
+suppressPackageStartupMessages(library(httr))
+suppressPackageStartupMessages(library(lubridate))
+suppressPackageStartupMessages(library(dplyr))
+suppressPackageStartupMessages(library(plotly))
+suppressPackageStartupMessages(library(ggplot2))
+suppressPackageStartupMessages(library(cowplot))
+suppressPackageStartupMessages(library(scales))
+suppressPackageStartupMessages(library(sf))
+suppressPackageStartupMessages(library(DBI))
+suppressPackageStartupMessages(library(dbplyr))
+
+
+url2ecdc <- url2 <- "https://www.ecdc.europa.eu/sites/default/files/documents/COVID-19-geographic-disbtribution-worldwide-2020-11-09.xlsx"
+suppressMessages(GET(url2ecdc, write_disk(tf <- tempfile(fileext = ".xlsx"))))
+covid_world <- read_excel(tf)
+```
+
+We will set up the database connection to work on `covid_world` data.
+```{r}
+SQLcon <- dbConnect(RSQLite::SQLite(), ":memory:")
+dbWriteTable(SQLcon, "covid", covid_world, overwrite=TRUE)
+```
+
+Let's see what tables do we have in our database?
+```{r}
+dbListTables(SQLcon)
+```
+We can list the fields in a table: 
+
+```{r}
+dbListFields(SQLcon, name = "covid")
+```
+
+We can run SQL query direcly from R. To illustrate it we will run a query to obtain distinct values for the field "continentExp".
+
+```{r}
+dbFetch(dbSendQuery(SQLcon, "Select distinct continentExp from covid"))
+```
+
+Next, we will run a query to count how many entries we have for each continent
+```{r}
+dbFetch(
+  dbSendQuery(SQLcon,
+              "Select continentExp, count(*) as Count  
+                 from covid
+                 group by continentExp"))
+```
+
+and see how many entries are there for the UK, using a `where` clause.
+```{r}
+dbFetch(
+  dbSendQuery(SQLcon,
+               "Select continentExp, count(*) as Count  
+                  from covid
+                  Where countriesAndTerritories = 'United_Kingdom'
+                  group by continentExp"))
+```
+
+What is nice for people who are rusty with SQL, and who don't feel like learning both SQL and R, is that we can do all of this using the `diplyr` package in R.
+
+
+First we need to declare covid as a `tbl` for use with `dplyr`. We'll call it `covid_ecdc` to avoid any confusion. 
+
+```{r}
+covid_ecdc <- tbl(SQLcon, "covid")
+```
+This will now be treated as an R tibble, but it is still in the database!!!
+
+It is always useful to have a quick glance at data set structure to find out how information it containers is structured. Knowledge of the structure is important, because it allows to later filter out desired information very precisely based on criteria to limit specific dimensions, i.e. variables.
+
+```{r}
+covid_ecdc %>%
+  glimpse()
+```
+
+Before we go any further and start with the analysis of covid data we will replicate the above queries using the `dplyr` functions. First, to illustrate how easy is to do the columns selections with `dplyr` we'll select `countriesAndTerritories` and continentExp` from our `covid_ecdc` data.
+
+```{r}
+head(covid_ecdc %>% 
+       select(countriesAndTerritories, continentExp)) # returns first six rows of the vector, i.e. tibble
+```
+
+First query was the counts of entries for each continent.
+```{r}
+covid_ecdc %>% 
+  group_by(continentExp) %>% 
+  tally()
+```  
+
+The second was to look for the number of entries for the UK.
+```{r}
+covid_ecdc %>%
+  filter(countriesAndTerritories == "United_Kingdom") %>%
+  tally()
+```
+If you do not have to manipulate end do the engineering work with DBs, but rather you will need to access them to obtain data for the analysis, you might find possible and easier to do it all using the `dplyr` as being intuitive it's easier to write. You cannot deny that `dplyr`'s version looks neater and easier to write.  
+
+Next, we'll check the total number of readings for each country and present it in a table using the `DT` package. `DT` provides an R interface to the JavaScript library [`DataTables`](https://datatables.net), which will enable us to filter through the displayed data.
+
+```{r covid_ecdc, warning = FALSE, message = FALSE}
+if (!require("DT")) install.packages('DT') # returns a logical value say, FALSE if the requested package is not found and TRUE if the package is loaded
+tt <- covid_ecdc %>%
+  group_by(countriesAndTerritories) %>%
+  summarise(no_readings = n()) %>%
+  arrange(no_readings)
+  
+DT::datatable(data.frame(tt))
+```
+
+## Tidying Data
+
+We will focus our analysis on European countries and select them from our `covid_world` data, saving it all as `covid_eu` data frame object as this data needs tidying and wrangling and we do not want to limit ourself on using only `dplyr` functions in R. 
+```{r ecdc_data, warning = FALSE, message = FALSE}
+covid_eu <- covid_world %>% 
+  filter(continentExp == "Europe")
+  
+DT::datatable(covid_eu)
+```
+
+You can, however, try to pull the data from the server into R's memory and by using `dplyr` functions do required manipulations.  
+
+```{r, eval=FALSE}
+covid_eu <- covid_ecdc %>% 
+  filter(continentExp == "Europe") %>% 
+  collect()
+  
+DT::datatable(covid_eu)
+```
+
+The experience with COVID-19 shows that infection of the disease can be controlled by implementing the measures of prevention as soon as an outbreak has been detected.
+
+> To monitor the effectiveness of the introduced measures we will focus on daily cumulative cases of COVID-19 infection that can be expressed as 
+
+$$F(x) = \sum_{i=1}^{n} x_i$$
+
+> Although $F(x)$ can show the volume of epidemic it does not tell us directly about the changes in the acceleration of infections spread. This information can be provided by the derivatives of the $F(x)$. The first derivative $F^{’}(x)$ corresponds to the information of the number of the new cases detected every day and the second derivative $F^{’’}(x)$ provides the information about the acceleration of the epidemic. $F^{’’}(x) \approx 0$ indicates the state of stagnation, while $F^{’’}(x) < 0$ indicate deceleration and of course any $F^{’’}(x) > 0$ acceleration.
+
+We will carry on with the analysis by tidying `covid_eu` data and adding the information about those derivatives. First, we notice that there are 4 columns used to contain the date of reporting, which will allow us to remove columns 2-4 as redundant. We will only keep the `dateRep` column which requires some tidying up in respect to the format in which the dates are recorded. We will also carry out necessary calculations for obtaining the second derivative $F^{’’}(x)$ and rename some of the variables to make them easier to display and type. 😁 All of this is very easy to carry out in R using the `tidy verse`, opinionated collection of R packages for data science. 
+
+```{r}
+# --- tidy data ---
+glimpse(covid_eu)
+#covid_eu <- covid_eu[, -c(2:4)] # remove redundant information
+covid_eu <- covid_eu %>% 
+  separate(dateRep, c("dateRep"), sep = "T") %>%
+  group_by(countriesAndTerritories) %>% 
+  arrange(dateRep) %>% 
+  mutate(total_cases = cumsum(cases), 
+         total_deaths = cumsum(deaths)) %>% 
+  mutate(Diff_cases = total_cases - lag(total_cases),  # 1st derivative (same as cases)
+         Rate_pc_cases = round(Diff_cases/lag(total_cases) * 100, 2)) %>% # rate of change
+  mutate(second_der = Diff_cases - lag(Diff_cases)) %>% # 2nd derivative
+  rename(country = countriesAndTerritories) %>% 
+  rename(country_code = countryterritoryCode) %>% 
+  rename(Fx14dper100K = "Cumulative_number_for_14_days_of_COVID-19_cases_per_100000")
+
+covid_eu$dateRep <- as.Date(covid_eu$dateRep)
+head(covid_eu) # returns first six rows of the df
+```
+
+# Writing Functions
+
+As we would like to be able to plot this time series of the second derivatives $F^{’’}(x)$ for any country we will create functions that woill allow us for extracting a country from the `covid_eu` data and for plotting it as a time series. 
+
+```{r}
+# function for filltering a country from the given df
+sep_country <- function(df, ccode){ 
+  df_c <- df %>% 
+    filter(country_code == as.character(ccode))
+  return(df_c)
+}
+
+# plotting the 2nd derivative
+sec_der_plot <- function(df){
+  df %>% 
+  filter(!is.na(second_der)) %>% 
+    ggplot(aes(x = dateRep, y = second_der)) +
+    geom_line() + geom_point(col = "#00688B") +
+    xlab("") + ylab("") +
+    labs (title = "2nd derivative of F(x)", 
+          caption = "Data from: https://www.ecdc.europa.eu") +
+    theme_minimal() +
+    theme(plot.title = element_text(size = 14, vjust = 2, hjust=0.5),
+          panel.grid.major.x = element_blank(),
+          panel.grid.minor.x = element_blank())
+}
+```
+
+# Data Visualisation
+
+Once we have accessed and tidied up our data in R we can carry out the exploitative analysis using the visualisation as an effective tool. 
+
+## plotly and ggplot
+
+We will start reporting by illustrating the time series of daily number of new infection cases and deaths. To make this plot more informative, we will create it sn an interactive web graphic using the `plotly` library. You can explore different kind of `plotly` graphs in R from <https://plotly.com/r/basic-charts/> or by reading [Step-by-Step Data Visualization Guideline with Plotly in R](https://medium.com/swlh/step-by-step-data-visualization-guideline-with-plotly-in-r-fbd212640de2) blog post.
+
+**[ecdc](https://www.ecdc.europa.eu/en) data updated on <span style="color:dodgerblue3">`r max(covid_eu$dateRep)`</span>**
+
+```{r plot_no_CasesDeaths, echo=FALSE}
+# Plot cases and deaths day-by-day
+
+covid_uk <- sep_country(covid_eu, "GBR")
+
+x <- list(title = "date reported")
+
+fig <- plot_ly(covid_uk, x = ~  dateRep) 
+fig <- fig %>% add_trace(y = ~cases, name = 'cases', type = 'scatter', mode = 'lines')
+fig <- fig %>% add_trace(y = ~deaths, name = 'deaths', type = 'scatter', mode = 'lines')   
+fig <- fig %>% layout(xaxis = x)
+fig
+```
+
+The plots below illustrate dynamic changes based on the $F(x)$ created using the `ggplot2` package. What we would like to see is the flattening of the bars indicating the slowdown in the number of new Covid-19 infection cases.
+
+```{r}
+covid_uk %>% 
+  ggplot(aes(x = dateRep, y = total_cases)) +
+  geom_bar(stat="identity", fill = "#00688B") + 
+  labs (title = "Cumultive number of cases F(x)", 
+        caption = "Data from: https://www.ecdc.europa.eu", 
+        x = "Date", y = "number of cases") +
+  theme_minimal() +
+  theme(plot.title = element_text(size = 14, vjust = 2, hjust=0.5),
+        panel.grid.major.x = element_blank(),
+        panel.grid.minor.x = element_blank()) +
+  theme(legend.position="none") 
+```
+
+We will present the same information this time using the line plot integrating interactivity in display of the information by using the `ggplotly()` function.
+
+```{r}
+pl1 <- covid_uk %>% 
+  ggplot(aes(x = dateRep, y = total_cases)) +
+  geom_line() + geom_point(col = "#00688B") +
+  xlab("Date") + ylab("Number of Cases") +
+  labs (title = "F(x)", 
+        caption = "Data from: https://www.ecdc.europa.eu") +
+  theme_minimal() +
+  theme(plot.title = element_text(size = 14, vjust = 2, hjust=0.5),
+        panel.grid.major.x = element_blank(),
+        panel.grid.minor.x = element_blank())
+ggplotly(pl1)
+```
+
+The following graph presents the cumulative number of covid-19 cases using a logarithmic scale to emphasise the rate of change in a way that a linear scale does not.
+
+```{r}
+pl_log <- covid_uk %>% 
+  mutate(log_total_cases = log(total_cases)) %>% 
+  ggplot(aes(x = dateRep, y = log_total_cases)) +
+  geom_line() + geom_point(col = "#00688B") +
+  xlab("") + ylab("") +
+  labs (title = "F(x) on log scale", 
+        caption = "Data from: https://www.ecdc.europa.eu") +
+  theme_minimal() +
+  theme(plot.title = element_text(size = 14, vjust = 2, hjust=0.5),
+        panel.grid.major.x = element_blank(),
+        panel.grid.minor.x = element_blank()) 
+pl_log
+```
+
+Sometimes it might be useful to present a several plots next to each other. To do this in R we apply the `plot_grid()` function from the `cowplot` package.  
+
+```{r}
+plot_grid(pl1, pl_log)
+```
+
+Next we will illustrate the cumulative number of cases for all selected European countries
+
+```{r}
+all_plot <- covid_eu %>% 
+  filter(country_code %in% c("GBR", "FRA", "DEU", "ITA", "ESP", "SWE")) %>% 
+  filter(dateRep > (max(dateRep) - 21)) %>% 
+  ggplot(aes(x = dateRep, y = total_cases, colour = country_code)) +
+  geom_line() + 
+  xlab("") + ylab("") +
+  labs (title = "F(x) in the last three weeks", 
+        caption = "Data from: https://www.ecdc.europa.eu") +
+  theme_minimal() +
+  theme(plot.title = element_text(size = 14, vjust = 2, hjust=0.5),
+        panel.grid.major.x = element_blank(),
+        panel.grid.minor.x = element_blank()) +
+  scale_x_date(labels = date_format("%m-%d"),
+               breaks = 'day') +
+  scale_colour_brewer(palette = "Set1") +
+  theme_classic() +
+  theme(legend.position = "bottom") +
+  theme(axis.text.x = element_text(angle = 90)) 
+ggplotly(all_plot)
+```
+
+Again, this would be easier to compare using the log scale
+
+```{r}
+covid_eu %>% 
+  filter(country_code %in% c("GBR", "FRA", "DEU", "ITA", "ESP", "SWE")) %>% 
+  filter(dateRep > (max(dateRep) - 21)) %>% 
+  mutate(log_total_cases = log(total_cases)) %>% 
+  ggplot(aes(x = dateRep, y = log_total_cases, colour = country_code)) +
+  geom_line() + 
+  xlab("") + ylab("") +
+  labs (title = "logF(x) in the last three weeks", 
+        caption = "Data from: https://www.ecdc.europa.eu") +
+  theme_minimal() +
+  theme(plot.title = element_text(size = 14, vjust = 2, hjust=0.5),
+        panel.grid.major.x = element_blank(),
+        panel.grid.minor.x = element_blank()) +
+  scale_x_date(labels = date_format("%m-%d"),
+               breaks = 'day') +
+  scale_colour_brewer(palette = "Set1") +
+  theme_classic() +
+  theme(legend.position = "bottom") +
+  theme(axis.text.x = element_text(angle = 45)) 
+```
+
+The following plot enables us to observe the change to the acceleration in relaion to the governmental measurments.
+
+```{r}
+covid_uk %>% 
+  filter(!is.na(second_der)) %>% 
+  ggplot(aes(x = dateRep, y = second_der)) +
+  geom_line() + geom_point(col = "#00688B") +
+  xlab("") + ylab("") +
+  labs (title = "2nd derivative of F(x) for SR", 
+        caption = "Data from: https://www.ecdc.europa.eu") +
+  theme_minimal() +
+  theme(plot.title = element_text(size = 14, vjust = 2, hjust=0.5),
+        panel.grid.major.x = element_blank(),
+        panel.grid.minor.x = element_blank()) +
+  geom_vline(xintercept = as.numeric(as.Date("2020-03-23")), linetype = 3, colour = "red", alpha = 0.5) +
+  geom_vline(xintercept = as.numeric(as.Date("2020-05-10")), linetype = 3, colour = "dodgerblue4", alpha = 0.5) +
+  geom_vline(xintercept = as.numeric(as.Date("2020-07-04")), linetype = 3, colour = "chartreuse4", alpha = 0.5) +
+  geom_vline(xintercept = as.numeric(as.Date("2020-11-05")), linetype = 3, colour = "red", alpha = 0.5) +
+  annotate(geom="text", x=as.Date("2020-03-23"), y = 8000, 
+           label="UK wide lockdown", col = "red") +
+  annotate(geom="text", x=as.Date("2020-05-21"), y = 5000, 
+           label="lockdown lifting plan", col = "dodgerblue4") +
+  annotate(geom="text", x=as.Date("2020-07-04"), y = -5000, 
+           label="wide-ranging changes" , col = "chartreuse4") +
+  annotate(geom="text", x=as.Date("2020-11-05"), y = 8000, 
+           label="UK wide lockdown", col = "red")  
+```
+
+Let us see how does those figures compare with other countries in particular France and Germany.
+
+**France: $F^{''}(x)$**
+```{r}
+covid_fr <- sep_country(covid_eu, "FRA") 
+sdfr <- sec_der_plot(covid_fr)
+ggplotly(sdfr)
+```
+
+**Germany: $F^{''}(x)$**
+```{r}
+covid_de <- sep_country(covid_eu, "DEU") 
+sdde <- sec_der_plot(covid_de)
+ggplotly(sdde)
+```
+
+Next, we are going to visualise a comparison between those three countries of total number of deaths month by month.
+
+```{r}
+covid_eu %>% 
+   filter(country %in% c("United_Kingdom", "Germany", "France")) %>% 
+   mutate(mon = month(dateRep, label = TRUE, abbr = TRUE)) %>% 
+   group_by(country, mon) %>% 
+   summarise(no_readings = n(), tdeath = max(total_deaths)) %>% 
+   ggplot(aes(x = mon, y = tdeath, fill = country)) +
+   geom_bar(stat="identity", position = "dodge", color = "black") +
+   theme(plot.title = element_text(size = 14, vjust = 2, hjust=0.5)) +
+   labs (title = "total number of deaths by monts", 
+         caption = "Data from: https://www.ecdc.europa.eu/en", 
+         x = "month", y = "number of deaths") +
+   scale_fill_brewer(palette="Paired") + 
+   theme(legend.position="bottom") 
+```
+
+We can make the same kind of comparisons for the total number of infections. But, before we just copy/paste and make an adjustment for `y` access, note that the order of the months doesn't show in the line of the  time of covid-19 events. The recording of information about the pandemic spread has started last December, which means that the bars should be in the order form December to November. We are also going to flip the bars to see if it will add to its readability. 
+
+```{r}
+covid_eu %>% 
+   filter(country %in% c("United_Kingdom", "Germany", "France")) %>% 
+   mutate(mon = month(dateRep, label = TRUE, abbr = TRUE)) %>% 
+   mutate(mon = factor(mon, levels=c("Dec", "Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov"))) %>% 
+   group_by(country, mon) %>% 
+   summarise(no_readings = n(), tcases = max(total_cases)) %>% 
+   ggplot(aes(x = mon, y = tcases, fill = country)) +
+   geom_bar(stat="identity", position = "dodge", color = "black") +
+   coord_flip() +
+   theme(plot.title = element_text(size = 14, vjust = 2, hjust=0.5)) +
+   labs (title = "total number of infections by monts", 
+         caption = "Data from: https://www.ecdc.europa.eu/en", 
+         x = "month", y = "number of infections") +
+   scale_fill_brewer(palette="Set1") + 
+   theme(legend.position="bottom") 
+```
+
+We can present total number of infections for each month. As the numbers are heigh we are going to "control" the way the values on the `y` access are going to appear. 
+
+```{r}
+covid_eu %>% 
+   filter(country %in% c("United_Kingdom", "Germany", "France")) %>% 
+   mutate(mon = month(dateRep, label = TRUE, abbr = TRUE)) %>% 
+   mutate(mon = factor(mon, levels=c("Dec", "Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov"))) %>% 
+   group_by(country, mon) %>% 
+   summarise(month_cases = sum(cases)) %>% 
+   ggplot(aes(x = mon, y = month_cases, fill = country)) +
+   geom_bar(stat="identity", position = "dodge", color = "black") +
+   theme(plot.title = element_text(size = 14, vjust = 2, hjust=0.5)) +
+   scale_y_continuous(breaks = seq(0, 800000, 200000), labels = c("0", "200K", "400K", "600K", "800K")) +
+   labs (title = "total number of infections each monts", 
+         caption = "Data from: https://www.ecdc.europa.eu/en", 
+         x = "month", y = "number of deaths") +
+   scale_fill_brewer(palette="Dark2") + 
+   theme(legend.position="bottom") 
+```
+Next, we are going to present total number of deaths for each of the month since the recording has started. Note, that in the code there is a line that is currently set as a comment that allos for the values to appear as texts on the top of the bars. You can go ahead and uncomment this line by removing the hashtag simbol in front of it.  
+ 
+```{r}
+covid_eu %>% 
+   filter(country %in% c("United_Kingdom", "Germany", "France")) %>% 
+   mutate(mon = month(dateRep, label = TRUE, abbr = TRUE)) %>% 
+   mutate(mon = factor(mon, levels=c("Dec", "Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov"))) %>% 
+   group_by(country, mon) %>% 
+   summarise(month_deaths = sum(deaths)) %>% 
+   ggplot(aes(x = mon, y = month_deaths, fill = country)) +
+   geom_bar(stat="identity", position = "dodge", color = "black") +
+   theme(plot.title = element_text(size = 14, vjust = 2, hjust=0.5)) +
+#   geom_text(aes(label = month_cases), size = 3, hjust = 0.5) +  
+   labs (title = "total number of deaths each months", 
+         caption = "Data from: https://www.ecdc.europa.eu/en", 
+         x = "month", y = "number of cases") +
+   scale_fill_brewer(palette="Accent") + 
+   theme(legend.position="bottom") 
+```
+
+### Spatial Visualisation
+
+We will create choropleth in which we will colour the EU countries according to the most current value of cumulative number for 14 days of COVID-19 cases per 100000. To do this we will use the shape file onto which we will superimpose this value as a colour of the polygon, i.e. country. 
+
+```{r}
+#pointed to the shape file available from: https://ec.europa.eu/eurostat/web/gisco/geodata/reference-data/administrative-units-statistical-units/nuts
+nuts_eu <- "shapes/NUTS_RG_60M_2021_4326.shp"
+
+#used the st_read() function to import it
+nuts_eu <- st_read(nuts_eu)
+
+# plot the shape file
+ggplot(nuts_eu) + 
+  geom_sf()
+
+
+covid_EU <- covid_eu %>% 
+  filter(country %in% c("Austria","Belgium","Bulgaria","Croatia","Cyprus",
+                   "Czechia","Denmark","Estonia","Finland","France",
+                   "Germany","Greece","Hungary","Ireland","Italy","Latvia",
+                   "Lithuania","Luxembourg","Malta","Netherlands","Poland",
+                   "Portugal","Romania","Slovakia","Slovenia","Spain",
+                   "Sweden","United_Kingdom")) %>% 
+  filter(dateRep == max(dateRep))
+
+my_map <- left_join(nuts_eu, covid_EU,
+                    by = c("CNTR_CODE" = "geoId"))
+
+ggplot(my_map) +
+  geom_sf(aes(fill = Fx14dper100K)) +
+  scale_fill_distiller(direction = 1, name = "Fx14per100K") +
+  labs(title="Cumulative number for 14 days of COVID-19 cases per 100000", caption="Source: ecdc")
+```  
+
+```{r}
+DT::datatable(my_map)
+```
+
+With the `tmap` package, thematic maps can be generated with great effectiveness presenting several layers of information. The syntax is similar to the one adopted in `ggplot`. Motivation and the explanation of this package has been proposed and published in [tmap: Thematic Maps in R](https://www.jstatsoft.org/article/view/v084i06) article. 
+
+If you're interested learning more about creating maps in R check the online version of the book [Geocomputation with R](https://geocompr.robinlovelace.net). [Chapter 8: The Making maps with R](https://geocompr.robinlovelace.net/adv-map.html) of the book provides easy to follow overview on using the `tmap` and other packages for crating beautiful maps in R.
+
+```{r results=FALSE}
+library(tmap)
+library(tmaptools)
+
+
+my_map <- my_map %>% 
+#  filter(!is.na(Fx14dper100K)) %>% 
+  mutate(ln_deaths = log(deaths)^10)
+
+tm_shape(my_map) +
+  tm_polygons("country", 
+              id = "country", 
+              palette = "YlGn", 
+              title = "Covid-19",
+              popup.vars=c("cases", 
+                           "deaths")) +
+  tm_bubbles(size = "deaths", 
+     #        col = "ln_deaths", 
+             border.col = "black", 
+             border.alpha = 1, 
+             style = "fixed", 
+             palette = "PuRd", 
+             contrast = 1, 
+             title.col = "total number of deaths",
+             id = "country",
+             popup.vars=c("cases", 
+                          "deaths")) +
+  tm_layout(legend.title.size = .5, legend.text.size = .65,
+            legend.frame = TRUE
+            ) +
+  tm_layout(title = "Covid-19</b><br>data source: <a href='https://www.ecdc.europa.eu/en/covid-19-pandemic'>ECDC</a>",
+          frame = FALSE,
+          inner.margins = c(0.1, 0.1, 0.05, 0.05)) 
+```
+
+```{r}
+tmap_mode("view")
+tmap_last()
+```
+
+Lastly, we should not forget to disconnect from the database. 
+```
+dbDisconnect(SQLcon)
+```
+
+# Useful Links
+
+- [Databases using R](https://db.rstudio.com)
+
+- [SQL databases and R](https://datacarpentry.org/R-ecology-lesson/05-r-and-databases.html)
+
+- [Book: Interactive web-based data visualization with R, plotly, and shiny](https://plotly-r.com)
