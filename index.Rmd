@@ -46,7 +46,7 @@ leaflet() %>%
   addMarkers(lng = 114.3055, lat = 30.5928, popup = "<b>Wuhan, capital of Central China’s Hubei province</b><br><a href='https://www.ft.com/content/82574e3d-1633-48ad-8afb-71ebb3fe3dee'>China and Covid-19: what went wrong in Wuhan?</a>")
 ```
 
-Experiance has shown that for public health intervention to be successful governmental authorities need to:
+Experience has shown that for public health intervention to be successful governmental authorities need to:
 
 - identify the infected and provide treatment 
 - locate and quarantine all those who had contact with the infected 
@@ -101,7 +101,7 @@ SomeRecords <- dbFetch(dbSendQuery(DBI_Connection,
 #Writing a new table called 'Table_created_in_R' using the R data.frame called "my_df", with `append` and `overwrite` options
 dbWriteTable(DBI_Connection,"Table_created_in_R", my_df, overwrite = TRUE)
 ```
-  We use `tbl()` to define a table as if it were part of the R work-space, and specify as the function's arguments the connection object and the name of the table in the database.
+  We use `tbl()` to define a table as if it were part of the R work-space, and to specify as the function's arguments the connection object and the name of the table in the database.
 ```{r, eval=FALSE}
 MyTable_Rws <- tbl(DBI_Connection, "MyTable_DB")
 ```
@@ -176,7 +176,7 @@ SQLcon <- dbConnect(RSQLite::SQLite(), ":memory:")
 dbWriteTable(SQLcon, "covid", covid_world, overwrite=TRUE)
 ```
 
-Let's see what tables we have in our database?
+Let's see what tables we have in our database.
 ```{r}
 dbListTables(SQLcon)
 ```
@@ -186,7 +186,7 @@ We can list the fields in a table:
 dbListFields(SQLcon, name = "covid")
 ```
 
-We can run SQL query directly from R. To illustrate it we will run a query to obtain distinct values for the field "continentExp".
+We can run an SQL query directly from R. To illustrate it we will run a query to obtain distinct values for the field "continentExp".
 
 ```{r}
 dbFetch(dbSendQuery(SQLcon, "Select distinct continentExp from covid"))
@@ -201,7 +201,7 @@ dbFetch(
                  group by continentExp"))
 ```
 
-and see how many entries are there for the UK, using a `where` clause.
+and see how many entries there are for the UK, using a `where` clause.
 ```{r}
 dbFetch(
   dbSendQuery(SQLcon,
@@ -211,7 +211,7 @@ dbFetch(
                   group by continentExp"))
 ```
 
-Fortunately for people who are rusty with SQL, and who don't feel like learning both SQL and R, is that we can do all of this using the `diplyr` package in R.
+Fortunately for people who are rusty with SQL, and who don't feel like learning both SQL and R, we can do all of this using the `diplyr` package in R.
 
 
 First we need to declare covid as a `tbl` for use with `dplyr`. We'll call it `covid_ecdc` to avoid any confusion. 
@@ -221,21 +221,21 @@ covid_ecdc <- tbl(SQLcon, "covid")
 ```
 This will now be treated as an R tibble, but it is still in the database!!!
 
-It is always useful to have a quick glance at data set structure to find out how information it containers is structured. Knowledge of the structure is important, because it allows to later filter out desired information very precisely based on criteria to limit specific dimensions, i.e. variables.
+It is always useful to have a quick glance at data set structure to find out how information it contains is structured. Knowledge of the structure is important, because it allows us later to filter out desired information very precisely based on criteria to limit specific dimensions, i.e. variables.
 
 ```{r}
 covid_ecdc %>%
   glimpse()
 ```
 
-Before we go any further and start with the analysis of covid data we will replicate the above queries using the `dplyr` functions. First, to illustrate how easy is to do the columns selections with `dplyr` we'll select `countriesAndTerritories` and continentExp` from our `covid_ecdc` data.
+Before we go any further and start with the analysis of covid data we will replicate the above queries using the `dplyr` functions. First, to illustrate how easy it is to do the column selection with `dplyr` we'll select `countriesAndTerritories` and continentExp` from our `covid_ecdc` data.
 
 ```{r}
 head(covid_ecdc %>% 
        select(countriesAndTerritories, continentExp)) # returns first six rows of the vector, i.e. tibble
 ```
 
-First query was the counts of entries for each continent.
+The First query was the count of entries for each continent.
 ```{r}
 covid_ecdc %>% 
   group_by(continentExp) %>% 
@@ -248,7 +248,7 @@ covid_ecdc %>%
   filter(countriesAndTerritories == "United_Kingdom") %>%
   tally()
 ```
-If you do not have to manipulate end do the engineering work with DBs, but rather you will need to access them to obtain data for the analysis, you might find possible and easier to do it all using the `dplyr` as being intuitive it's easier to write. You cannot deny that `dplyr`'s version looks neater and easier to write.  
+If you do not have to manipulate and do the engineering work with DBs, but you need to access it to obtain data for the analysis, you might find it easier to do it all using the `dplyr`. It is intuitive and therefore easier to write. You cannot deny that `dplyr`'s version looks neater and easier to write.  
 
 Next, we'll check the total number of readings for each country and present it in a table using the `DT` package. `DT` provides an R interface to the JavaScript library [`DataTables`](https://datatables.net), which will enable us to filter through the displayed data.
 
@@ -264,7 +264,7 @@ DT::datatable(data.frame(tt))
 
 ## Tidying Data
 
-We will focus our analysis on European countries and select them from our `covid_world` data, saving it all as `covid_eu` data frame object as this data needs tidying and wrangling and we do not want to limit ourself on using only `dplyr` functions in R. 
+We will focus our analysis on European countries and select them from our `covid_world` data, saving it all as `covid_eu` data frame object as this data needs tidying and wrangling and we do not want to limit ourselves by using only `dplyr` functions in R. 
 ```{r ecdc_data, warning = FALSE, message = FALSE}
 covid_eu <- covid_world %>% 
   filter(continentExp == "Europe")
@@ -272,7 +272,7 @@ covid_eu <- covid_world %>%
 DT::datatable(covid_eu)
 ```
 
-You can, however, try to pull the data from the server into R's memory and by using `dplyr` functions do required manipulations.  
+You can, however, try to pull the data from the server into R's memory and by using `dplyr` functions do the required manipulations.  
 
 ```{r, eval=FALSE}
 covid_eu <- covid_ecdc %>% 
@@ -381,7 +381,7 @@ covid_uk %>%
   theme(legend.position="none") 
 ```
 
-We will present the same information this time using the line plot integrating interactivity in displaying the information by using the `ggplotly()` function.
+We will present the same information this time using the line plot integrating interactivity, displaying the information by using the `ggplotly()` function.
 
 ```{r}
 pl1 <- covid_uk %>% 
@@ -468,7 +468,7 @@ covid_eu %>%
   theme(axis.text.x = element_text(angle = 45)) 
 ```
 
-The following plot enables us to observe the change to the acceleration in relation to the governmental measurements.
+The following plot enables us to observe the change in the acceleration in relation to the governmental measures.
 
 ```{r}
 covid_uk %>% 
@@ -523,7 +523,7 @@ covid_eu %>%
    ggplot(aes(x = mon, y = tdeath, fill = country)) +
    geom_bar(stat="identity", position = "dodge", color = "black") +
    theme(plot.title = element_text(size = 14, vjust = 2, hjust=0.5)) +
-   labs (title = "total number of deaths by monts", 
+   labs (title = "total number of deaths by month", 
          caption = "Data from: https://www.ecdc.europa.eu/en", 
          x = "month", y = "number of deaths") +
    scale_fill_brewer(palette="Paired") + 
@@ -543,7 +543,7 @@ covid_eu %>%
    geom_bar(stat="identity", position = "dodge", color = "black") +
    coord_flip() +
    theme(plot.title = element_text(size = 14, vjust = 2, hjust=0.5)) +
-   labs (title = "total number of infections by months", 
+   labs (title = "total number of infections by month", 
          caption = "Data from: https://www.ecdc.europa.eu/en", 
          x = "month", y = "number of infections") +
    scale_fill_brewer(palette="Set1") + 
@@ -563,7 +563,7 @@ covid_eu %>%
    geom_bar(stat="identity", position = "dodge", color = "black") +
    theme(plot.title = element_text(size = 14, vjust = 2, hjust=0.5)) +
    scale_y_continuous(breaks = seq(0, 800000, 200000), labels = c("0", "200K", "400K", "600K", "800K")) +
-   labs (title = "total number of infections each monts", 
+   labs (title = "total number of infections each month", 
          caption = "Data from: https://www.ecdc.europa.eu/en", 
          x = "month", y = "number of deaths") +
    scale_fill_brewer(palette="Dark2") + 
@@ -582,7 +582,7 @@ covid_eu %>%
    geom_bar(stat="identity", position = "dodge", color = "black") +
    theme(plot.title = element_text(size = 14, vjust = 2, hjust=0.5)) +
 #   geom_text(aes(label = month_cases), size = 3, hjust = 0.5) +  
-   labs (title = "total number of deaths each months", 
+   labs (title = "total number of deaths each month", 
          caption = "Data from: https://www.ecdc.europa.eu/en", 
          x = "month", y = "number of cases") +
    scale_fill_brewer(palette="Accent") + 
@@ -629,7 +629,7 @@ DT::datatable(my_map)
 
 With the `tmap` package, thematic maps can be generated with great effectiveness presenting several layers of information. The syntax is similar to the one adopted in `ggplot`. Motivation and the explanation of this package has been proposed and published in the article [tmap: Thematic Maps in R](https://www.jstatsoft.org/article/view/v084i06). 
 
-If you are interested in learning more about creating maps in R check the online version of the book [Geocomputation with R](https://geocompr.robinlovelace.net). [Chapter 8: The Making maps with R](https://geocompr.robinlovelace.net/adv-map.html) provides easy to follow overview on using the `tmap` and other packages for creating beautiful maps in R.
+If you are interested in learning more about creating maps in R check the online version of the book [Geocomputation with R](https://geocompr.robinlovelace.net). [Chapter 8: The Making maps with R](https://geocompr.robinlovelace.net/adv-map.html) provides an  to follow overview on using the `tmap` and other packages for creating beautiful maps in R.
 
 ```{r results=FALSE}
 library(tmap)
