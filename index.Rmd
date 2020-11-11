@@ -25,9 +25,9 @@ knitr::opts_chunk$set(echo = TRUE,
 ```
 
 
-Open data belongs to everyone; it empowers people to make informed decisions that are not clouded by misinformation, rumour and gossip. To be able to identify the underlying facts within data sets, it is crucial that individuals and communities possess the necessary skills. Open data is often inconsistent and limited and requires a significant amount of time to organise and structure for presentation.
+Open data belongs to everyone; it empowers people to make informed decisions that are not clouded by misinformation, rumour and gossip. To be able to identify the underlying facts within data sets, it is crucial that individuals and communities possess the necessary skills. Open data is often inconsistent and limited and requires a significant amount of time to organise and structure for presentation purposes.
 
-This is a data analysis report concerning the visualisation of the COVID-19 virus within the United Kingdom and Europe. All of the report is created with [R](https://www.r-project.org). It represents a case study as an illustration of the concepts presented at the workshop on basic R for data analysts. To learn how to use R and develop a report like this visit [Website with the workshop material](https://www.geolytix.co.uk). <
+This is a data analysis report concerning the visualisation of the COVID-19 virus within the United Kingdom and Europe. All of the report is created with [R](https://www.r-project.org). It represents a case study as an illustration of the concepts presented at the workshop on basic R for data analysts. To learn how to use R and develop a report like this visit the [Website with the workshop material](https://www.geolytix.co.uk).
 
 # Covid-19: Open Data
 
@@ -37,7 +37,7 @@ The novel coronavirus disease 2019 (COVID-19) was first reported in Wuhan, China
 # If you don't have the "leaflet" package installed yet, uncomment and run the line below
 #install.packages("leaflet")
 library(leaflet)
-# Initialize and assign us as the leaflet object
+# Initialize and assign as the leaflet object
 leaflet() %>%
   # add tiles to the leaflet object
   addTiles() %>%  
@@ -54,7 +54,7 @@ Experience has shown that for public health intervention to be successful govern
 - promote the use of masks and social distancing
 - release to the public the number of new infections and deaths on a daily basis through open data
 
-The importance of hand washing, wearing a mask and social distancing as a tool to limit disease transmission is well recognised, but nonetheless ensuring social distancing especially in densely populated urban areas is still challenging. Well educated communities are critical for an effective response and for the prevention of local outbreaks. The sharing of factual information that can be understood and trusted by the communities in bringing about a change in their behaviour to implement efficiently desired public health actions is a must. Trust and transparency are fundamental in obtaining absolute public engagement. The publishing of daily figures that can be freely analysed and scrutinised can help in engaging communities and obtaining its willing and continued support in controlling the spread of infection.
+The importance of hand washing, wearing a mask and social distancing as a tool to limit disease transmission is well recognised, but nonetheless ensuring social distancing especially in densely populated urban areas is still challenging. Well-educated communities are critical for an effective response and for the prevention of local outbreaks. The sharing of factual information that can be understood and trusted by the communities in bringing about a change in their behaviour to implement efficiently desired public health actions is a must. Trust and transparency are fundamental in obtaining absolute public engagement. The publishing of daily figures that can be freely analysed and scrutinised can help in engaging communities and obtaining its willing and continued support in controlling the spread of infection.
 
 ## Working with DB in R
 
@@ -108,10 +108,10 @@ MyTable_Rws <- tbl(DBI_Connection, "MyTable_DB")
 If we need to pull the data from the server into R's memory we can use the `collect()` function. 
 
 The `DBI` package can be combined with:
-
-    * the `dplyr` package: to make the `tbl`s and to work on them using the `dplyr` syntax
-    * the `dbplyr` package: allows translation of SQL to dplyr
-    * the `odbc`package: provides the odbc drivers, but you could use the functions below with other drivers instead
+  
+  * the `dplyr` package: to make the `tbl`s and to work on them using the `dplyr` syntax
+  * the `dbplyr` package: allows translation of SQL to dplyr
+  * the `odbc`package: provides the odbc drivers, but you could use the functions below with other drivers instead
     
 ```{r, eval=FALSE}    
     DBI_Connection <- dbConnect(odbc(), 
@@ -142,7 +142,7 @@ Useful DBI commands
 
 ## Reading Data
 	
-[European Centre for Disease Prevention and Control](https://www.ecdc.europa.eu/en/publications-data/download-todays-data-geographic-distribution-covid-19-cases-worldwide) provides daily updates of new reported cases of COVID-19 by country worldwide. The downloadable data file is updated daily and contains the latest available public data on COVID-19. Each row/entry contains the number of new cases reported per country and per day (with a lag of a day).
+[European Centre for Disease Prevention and Control](https://www.ecdc.europa.eu/en/publications-data/download-todays-data-geographic-distribution-covid-19-cases-worldwide) provides daily updates of newly reported cases of COVID-19 by country worldwide. The downloadable data file is updated daily and contains the latest available public data on COVID-19. Each row/entry contains the number of new cases reported per country and per day (with a lag of a day).
 
 <https://www.ecdc.europa.eu/en/publications-data/download-data-response-measures-covid-19>
 
@@ -216,12 +216,12 @@ covid_ecdc <- tbl(SQLcon, "covid")
 ```
 This will now be treated as an R tibble, but it is still in the database!!!
 
-It is always useful to have a quick glance at data set structure to find out how information it contains is structured. Knowledge of the structure is important, because it allows us later to filter out desired information very precisely based on criteria to limit specific dimensions, i.e. variables.
+It is always useful to have a quick glance at the data set structure to find out how the information it contains is structured. Knowledge of the structure is important, because it allows us later to filter out the desired information very precisely based on criteria to limit specific dimensions, i.e. variables.
 ```{r}
 covid_ecdc %>%
   glimpse()
 ```
-Before we go any further and start with the analysis of covid data we will replicate the above queries using the `dplyr` functions. First, to illustrate how easy it is to do the column selection with `dplyr` we'll select `countriesAndTerritories` and continentExp` from our `covid_ecdc` data.
+Before we go any further and start the analysis of covid data we will replicate the above queries using the `dplyr` functions. First, to illustrate how easy it is to do the column selection with `dplyr` we'll select `countriesAndTerritories` and continentExp` from our `covid_ecdc` data.
 ```{r}
 head(covid_ecdc %>% 
        select(countriesAndTerritories, continentExp)) # returns first six rows of the vector, i.e. tibble
@@ -239,7 +239,7 @@ covid_ecdc %>%
   tally()
 ```
 
-If you do not have to manipulate and do the engineering work with DBs, but you need to access it to obtain data for the analysis, you might find it easier to do it all using the `dplyr`. It is intuitive and therefore easier to write. You cannot deny that `dplyr`'s version looks neater and easier to write.  
+If you do not have to manipulate and do the engineering work with DBs, but you need to access it to obtain data for the analysis, you might find it easier to do it all using the `dplyr`. It is intuitive and therefore easier to write. You cannot deny that `dplyr`'s version also looks neater.
 
 Next, we'll check the total number of readings for each country and present it in a table using the `DT` package. `DT` provides an R interface to the JavaScript library [`DataTables`](https://datatables.net), which will enable us to filter through the displayed data.
 
@@ -276,7 +276,7 @@ The experience with COVID-19 shows that the spread of the disease can be control
 > To monitor the effectiveness of the introduced measures we will focus on daily cumulative cases of COVID-19 infection that can be expressed as 
 $$F(x) = \sum_{i=1}^{n} x_i$$
 
-> Although $F(x)$ can show the volume of epidemic it does not tell us directly about the changes in the acceleration of  the spread of infection. This information can be provided by the derivatives of the $F(x)$. The first derivative $F^{’}(x)$ corresponds to the information of the number of new cases detected every day and the second derivative $F^{’’}(x)$ provides the information about the acceleration of the epidemic. $F^{’’}(x) \approx 0$ indicates the state of stagnation, while $F^{’’}(x) < 0$ indicates deceleration and of course any $F^{’’}(x) > 0$ acceleration.
+> Although $F(x)$ can show the volume of the epidemic it does not tell us directly about the changes in the acceleration of  the spread of infection. This information can be provided by the derivatives of the $F(x)$. The first derivative $F^{’}(x)$ corresponds to the information of the number of new cases detected every day and the second derivative $F^{’’}(x)$ provides the information about the acceleration of the epidemic. $F^{’’}(x) \approx 0$ indicates the state of stagnation, while $F^{’’}(x) < 0$ indicates deceleration and of course any $F^{’’}(x) > 0$ acceleration.
 
 We will carry on with the analysis by tidying `covid_eu` data and adding the information about those derivatives. First, we notice that there are 4 columns used to contain the date of reporting, which will allow us to remove columns 2-4 as redundant. We will only keep the `dateRep` column which requires some tidying up in respect of the format in which the dates are recorded. We will also carry out the necessary calculations for obtaining the second derivative $F^{’’}(x)$ and rename some of the variables to make them easier to display and type. 😁 All of this is very easy to carry out in R using the `tidy verse`, opinionated collection of R packages for data science. 
 
@@ -483,7 +483,7 @@ covid_uk %>%
            label="UK wide lockdown", col = "red")  
 ```
 
-Let us see how those those figures compare with other countries in particular France and Germany.
+Let us see how these figures compare with other countries in particular France and Germany.
 
 **France: $F^{''}(x)$**
 ```{r}
@@ -499,7 +499,7 @@ sdde <- sec_der_plot(covid_de)
 ggplotly(sdde)
 ```
 
-Next, we are going to visualise a comparison between those three countries of the total number of deaths month by month.
+Next, we are going to visualise a comparison between these three countries of the total number of deaths month by month.
 
 ```{r}
 covid_eu %>% 
