@@ -24,9 +24,10 @@ knitr::opts_chunk$set(echo = TRUE,
                       cache = FALSE)
 ```
 
+
 Open data belongs to everyone; it empowers people to make informed decisions that are not clouded by misinformation, rumour and gossip. To be able to identify the underlying facts within data sets, it is crucial that individuals and communities possess the necessary skills. Open data is often inconsistent and limited and requires a significant amount of time to organise and structure for presentation.
 
-This is a data analysis report concerning the visualisation of the COVID-19 virus within the United Kingdom and Europe. All of the report is created with [R](https://www.r-project.org). It represents a case study as an illustration of the concepts presented at the workshop on basic R for data analysts. To learn how to use R and develop a report like this visit [Website with the workshop material](https://www.geolytix.co.uk). 
+This is a data analysis report concerning the visualisation of the COVID-19 virus within the United Kingdom and Europe. All of the report is created with [R](https://www.r-project.org). It represents a case study as an illustration of the concepts presented at the workshop on basic R for data analysts. To learn how to use R and develop a report like this visit [Website with the workshop material](https://www.geolytix.co.uk). <
 
 # Covid-19: Open Data
 
@@ -45,7 +46,6 @@ leaflet() %>%
   # add a popup marker 
   addMarkers(lng = 114.3055, lat = 30.5928, popup = "<b>Wuhan, capital of Central China’s Hubei province</b><br><a href='https://www.ft.com/content/82574e3d-1633-48ad-8afb-71ebb3fe3dee'>China and Covid-19: what went wrong in Wuhan?</a>")
 ```
-
 Experience has shown that for public health intervention to be successful governmental authorities need to:
 
 - identify the infected and provide treatment 
@@ -58,7 +58,7 @@ The importance of hand washing, wearing a mask and social distancing as a tool t
 
 ## Working with DB in R
 
-In the big organisations data are often kept in a database and data you wish to access from it might be too large to fit into the memory of your computer. Connecting from R to a database to access necessary data for an analysis can be very useful as it will allows you to fetch only the chunks needed for the current study. R allows you to access and query database without having to download the data contained in it. The two most common methods of connection are:
+In big organisations data is often kept in a database and data you wish to access from it might be too large to fit into the memory of your computer. Connecting from R to a database to access the necessary data for an analysis can be very useful, as it allows you to fetch only the chunks needed for the current study. R enables you to access and query a database without having to download the data contained in it. The two most common methods of connection are:
 
 - **Option 1)**
     * the `RODBC` package: uses slightly older code; it can be used to connect to anything that uses ODBC.
@@ -86,10 +86,10 @@ When you finish working using the database you should disconnect from the server
 odbcClose(RODBC_connection)
 ```
 
-One of the author of this package is the famus statsistican [Brian Ripley](https://en.wikipedia.org/wiki/Brian_D._Ripley), and you can find more about the possibilities it offers by playing around with it using the guidance from [RDocumentation on RODBC v1.3-17](https://www.rdocumentation.org/packages/RODBC/versions/1.3-17). 
+One of the authors of this package is the famous statistician [Brian Ripley](https://en.wikipedia.org/wiki/Brian_D._Ripley), and you can find more about the possibilities it offers by playing around with it using the guidance from [RDocumentation on RODBC v1.3-17](https://www.rdocumentation.org/packages/RODBC/versions/1.3-17). 
 
 - **Option 2)** 
-    * the `DBI` package: a common database interface in R; can be used with different 'back-end' drivers such as MySQL, SQL Server, SQLite, Oracle etc; to write SQL it can be used on it's own:
+    * the `DBI` package: a common database interface in R; can be used with different 'back-end' drivers such as MySQL, SQL Server, SQLite, Oracle etc; to write SQL it can be used on its own:
 ```{r, eval=FALSE}
 # Can write an SQL query directly using the `dbSendQuery` function
 # Executes the query on the server-side only, but if you want the results back in R, you need to use `dbFetch`
@@ -101,16 +101,18 @@ SomeRecords <- dbFetch(dbSendQuery(DBI_Connection,
 #Writing a new table called 'Table_created_in_R' using the R data.frame called "my_df", with `append` and `overwrite` options
 dbWriteTable(DBI_Connection,"Table_created_in_R", my_df, overwrite = TRUE)
 ```
-  We use `tbl()` to define a table as if it was part of the R work-space, and specify as the function's arguments the connection object and the name of the table in the database.
+  We use `tbl()` to define a table as if it were part of the R work-space, and to specify as the function's arguments the connection object and the name of the table in the database.
 ```{r, eval=FALSE}
 MyTable_Rws <- tbl(DBI_Connection, "MyTable_DB")
 ```
 If we need to pull the data from the server into R's memory we can use the `collect()` function. 
 
 The `DBI` package can be combined with:
+
     * the `dplyr` package: to make the `tbl`s and to work on them using the `dplyr` syntax
     * the `dbplyr` package: allows translation of SQL to dplyr
     * the `odbc`package: provides the odbc drivers, but you could use the functions below with other drivers instead
+    
 ```{r, eval=FALSE}    
     DBI_Connection <- dbConnect(odbc(), 
                                 driver = "SQL Server",
@@ -119,7 +121,8 @@ The `DBI` package can be combined with:
 )
 ```
 
-With the waive of `tidy verse` evangelist the second option has become more popular as it allow to convert SQL into R using the `dplyr` commands chained with the pipe (` %>% `) operator. `dplyr` can translate many different query types into SQL. We can use it to do fairly complex queries without translation in just a few lines and obtain the results even though the data are still in the databas. 
+
+With the wave of `tidy verse` evangelists the second option has become more popular as it allows us to convert SQL into R using the `dplyr` commands chained with the pipe (` %>% `) operator. `dplyr` can translate many different query types into SQL. We can use it to do fairly complex queries without translation in just a few lines and obtain the results even though the data is still in the database. 
 
 
 Useful DBI commands
@@ -139,7 +142,7 @@ Useful DBI commands
 
 ## Reading Data
 	
-[European Centre for Disease Prevention and Control](https://www.ecdc.europa.eu/en/publications-data/download-todays-data-geographic-distribution-covid-19-cases-worldwide) provides daily update of new reported cases of COVID-19 by country worldwide. The downloadable data file is updated daily and contains the latest available public data on COVID-19. Each row/entry contains the number of new cases reported per country and per day (with a lag of a day).
+[European Centre for Disease Prevention and Control](https://www.ecdc.europa.eu/en/publications-data/download-todays-data-geographic-distribution-covid-19-cases-worldwide) provides daily updates of new reported cases of COVID-19 by country worldwide. The downloadable data file is updated daily and contains the latest available public data on COVID-19. Each row/entry contains the number of new cases reported per country and per day (with a lag of a day).
 
 <https://www.ecdc.europa.eu/en/publications-data/download-data-response-measures-covid-19>
 
@@ -175,23 +178,18 @@ We will set up the database connection to work on `covid_world` data.
 SQLcon <- dbConnect(RSQLite::SQLite(), ":memory:")
 dbWriteTable(SQLcon, "covid", covid_world, overwrite=TRUE)
 ```
-
-Let's see what tables do we have in our database?
+Let's see what tables we have in our database.
 ```{r}
 dbListTables(SQLcon)
 ```
 We can list the fields in a table: 
-
 ```{r}
 dbListFields(SQLcon, name = "covid")
 ```
-
-We can run SQL query direcly from R. To illustrate it we will run a query to obtain distinct values for the field "continentExp".
-
+We can run an SQL query directly from R. To illustrate it we will run a query to obtain distinct values for the field "continentExp".
 ```{r}
 dbFetch(dbSendQuery(SQLcon, "Select distinct continentExp from covid"))
 ```
-
 Next, we will run a query to count how many entries we have for each continent
 ```{r}
 dbFetch(
@@ -200,8 +198,7 @@ dbFetch(
                  from covid
                  group by continentExp"))
 ```
-
-and see how many entries are there for the UK, using a `where` clause.
+and see how many entries there are for the UK, using a `where` clause.
 ```{r}
 dbFetch(
   dbSendQuery(SQLcon,
@@ -211,44 +208,38 @@ dbFetch(
                   group by continentExp"))
 ```
 
-Fortunately for people who are rusty with SQL, and who don't feel like learning both SQL and R, can do all of this using the `diplyr` package in R.
-
+Fortunately for people who are rusty with SQL, and who don't feel like learning both SQL and R, we can do all of this using the `diplyr` package in R.
 
 First we need to declare covid as a `tbl` for use with `dplyr`. We'll call it `covid_ecdc` to avoid any confusion. 
-
 ```{r}
 covid_ecdc <- tbl(SQLcon, "covid")
 ```
 This will now be treated as an R tibble, but it is still in the database!!!
 
-It is always useful to have a quick glance at data set structure to find out how information it containers is structured. Knowledge of the structure is important, because it allows to later filter out desired information very precisely based on criteria to limit specific dimensions, i.e. variables.
-
+It is always useful to have a quick glance at data set structure to find out how information it contains is structured. Knowledge of the structure is important, because it allows us later to filter out desired information very precisely based on criteria to limit specific dimensions, i.e. variables.
 ```{r}
 covid_ecdc %>%
   glimpse()
 ```
-
-Before we go any further and start with the analysis of covid data we will replicate the above queries using the `dplyr` functions. First, to illustrate how easy is to do the columns selections with `dplyr` we'll select `countriesAndTerritories` and continentExp` from our `covid_ecdc` data.
-
+Before we go any further and start with the analysis of covid data we will replicate the above queries using the `dplyr` functions. First, to illustrate how easy it is to do the column selection with `dplyr` we'll select `countriesAndTerritories` and continentExp` from our `covid_ecdc` data.
 ```{r}
 head(covid_ecdc %>% 
        select(countriesAndTerritories, continentExp)) # returns first six rows of the vector, i.e. tibble
 ```
-
-First query was the counts of entries for each continent.
+The First query was the count of entries for each continent.
 ```{r}
 covid_ecdc %>% 
   group_by(continentExp) %>% 
   tally()
 ```  
-
 The second was to look for the number of entries for the UK.
 ```{r}
 covid_ecdc %>%
   filter(countriesAndTerritories == "United_Kingdom") %>%
   tally()
 ```
-If you do not have to manipulate end do the engineering work with DBs, but rather you will need to access them to obtain data for the analysis, you might find possible and easier to do it all using the `dplyr` as being intuitive it's easier to write. You cannot deny that `dplyr`'s version looks neater and easier to write.  
+
+If you do not have to manipulate and do the engineering work with DBs, but you need to access it to obtain data for the analysis, you might find it easier to do it all using the `dplyr`. It is intuitive and therefore easier to write. You cannot deny that `dplyr`'s version looks neater and easier to write.  
 
 Next, we'll check the total number of readings for each country and present it in a table using the `DT` package. `DT` provides an R interface to the JavaScript library [`DataTables`](https://datatables.net), which will enable us to filter through the displayed data.
 
@@ -264,15 +255,14 @@ DT::datatable(data.frame(tt))
 
 ## Tidying Data
 
-We will focus our analysis on European countries and select them from our `covid_world` data, saving it all as `covid_eu` data frame object as this data needs tidying and wrangling and we do not want to limit ourself on using only `dplyr` functions in R. 
+We will focus our analysis on European countries and select them from our `covid_world` data, saving it all as `covid_eu` data frame object as this data needs tidying and wrangling and we do not want to limit ourselves by using only `dplyr` functions in R. 
 ```{r ecdc_data, warning = FALSE, message = FALSE}
 covid_eu <- rbind(covid_world %>% filter(continentExp == "Europe"), 
                   covid_world %>% filter(countriesAndTerritories == "Turkey"))  
 
 DT::datatable(covid_eu)
 ```
-
-You can, however, try to pull the data from the server into R's memory and by using `dplyr` functions do required manipulations.  
+You can, however, try to pull the data from the server into R's memory and by using `dplyr` functions do the required manipulations.  
 
 ```{r, eval=FALSE}
 covid_eu <- covid_ecdc %>% 
@@ -281,14 +271,12 @@ covid_eu <- covid_ecdc %>%
   
 DT::datatable(covid_eu)
 ```
-
 The experience with COVID-19 shows that the spread of the disease can be controlled by implementing the measures of prevention as soon as an outbreak has been detected.
 
 > To monitor the effectiveness of the introduced measures we will focus on daily cumulative cases of COVID-19 infection that can be expressed as 
-
 $$F(x) = \sum_{i=1}^{n} x_i$$
 
-> Although $F(x)$ can show the volume of epidemic it does not tell us directly about the changes in the acceleration of  the spread of infection.  This information can be provided by the derivatives of the $F(x)$. The first derivative $F^{’}(x)$ corresponds to the information of the number of new cases detected every day and the second derivative $F^{’’}(x)$ provides the information about the acceleration of the epidemic. $F^{’’}(x) \approx 0$ indicates the state of stagnation, while $F^{’’}(x) < 0$ indicates deceleration and of course any $F^{’’}(x) > 0$ acceleration.
+> Although $F(x)$ can show the volume of epidemic it does not tell us directly about the changes in the acceleration of  the spread of infection. This information can be provided by the derivatives of the $F(x)$. The first derivative $F^{’}(x)$ corresponds to the information of the number of new cases detected every day and the second derivative $F^{’’}(x)$ provides the information about the acceleration of the epidemic. $F^{’’}(x) \approx 0$ indicates the state of stagnation, while $F^{’’}(x) < 0$ indicates deceleration and of course any $F^{’’}(x) > 0$ acceleration.
 
 We will carry on with the analysis by tidying `covid_eu` data and adding the information about those derivatives. First, we notice that there are 4 columns used to contain the date of reporting, which will allow us to remove columns 2-4 as redundant. We will only keep the `dateRep` column which requires some tidying up in respect of the format in which the dates are recorded. We will also carry out the necessary calculations for obtaining the second derivative $F^{’’}(x)$ and rename some of the variables to make them easier to display and type. 😁 All of this is very easy to carry out in R using the `tidy verse`, opinionated collection of R packages for data science. 
 
@@ -316,7 +304,7 @@ head(covid_eu) # returns first six rows of the df
 
 # Writing Functions
 
-As we would like to be able to plot this time series of the second derivatives $F^{’’}(x)$ for any country we will create functions that will allow us to extract a country from the `covid_eu` data and to plot it as a time series.
+As we would like to be able to plot this time series of the second derivatives $F^{’’}(x)$ for any country we will create functions that will allow us to extract a country from the `covid_eu` data and to plot it as a time series. 
 
 ```{r}
 # function for filltering a country from the given df
@@ -344,7 +332,8 @@ sec_der_plot <- function(df){
 
 # Data Visualisation
 
-Once we have accessed and tidied up our data in R we can carry out the exploitative analysis using visualisation as an effective tool.
+
+Once we have accessed and tidied up our data in R we can carry out the exploitative analysis using visualisation as an effective tool. 
 
 ## plotly and ggplot
 
@@ -382,7 +371,7 @@ covid_uk %>%
   theme(legend.position="none") 
 ```
 
-We will present the same information this time using the line plot integrating interactivity in displaying the information by using the `ggplotly()` function.
+We will present the same information this time using the line plot integrating interactivity, displaying the information by using the `ggplotly()` function.
 
 ```{r}
 pl1 <- covid_uk %>% 
@@ -415,14 +404,12 @@ pl_log <- covid_uk %>%
 pl_log
 ```
 
-Sometimes it might be useful to present several plots next to each other. To do this in R we apply the `plot_grid()` function from the `cowplot` package.  
+Sometimes it might be useful to present several plots next to each other. To do this in R we apply the `plot_grid()` function from the `cowplot` package. 
 
 ```{r}
 plot_grid(pl1, pl_log)
 ```
-
 Next we will illustrate the cumulative number of cases for all selected European countries
-
 ```{r}
 all_plot <- covid_eu %>% 
   filter(country_code %in% c("GBR", "FRA", "DEU", "ITA", "ESP", "SWE")) %>% 
@@ -468,8 +455,7 @@ covid_eu %>%
   theme(legend.position = "bottom") +
   theme(axis.text.x = element_text(angle = 45)) 
 ```
-
-The following plot enables us to observe the change to the acceleration in relation to the governmental measures.
+The following plot enables us to observe the change in the acceleration in relation to the governmental measures.
 
 ```{r}
 covid_uk %>% 
@@ -497,7 +483,7 @@ covid_uk %>%
            label="UK wide lockdown", col = "red")  
 ```
 
-Let us see how those figures compare with other countries in particular France and Germany.
+Let us see how those those figures compare with other countries in particular France and Germany.
 
 **France: $F^{''}(x)$**
 ```{r}
@@ -524,7 +510,7 @@ covid_eu %>%
    ggplot(aes(x = mon, y = tdeath, fill = country)) +
    geom_bar(stat="identity", position = "dodge", color = "black") +
    theme(plot.title = element_text(size = 14, vjust = 2, hjust=0.5)) +
-   labs (title = "total number of deaths by months", 
+   labs (title = "total number of deaths by month", 
          caption = "Data from: https://www.ecdc.europa.eu/en", 
          x = "month", y = "number of deaths") +
    scale_fill_brewer(palette="Paired") + 
@@ -532,6 +518,7 @@ covid_eu %>%
 ```
 
 We can make the same kind of comparisons for the total number of infections. But, before we just copy/paste and make an adjustment for `y` access, note that the order of the months does not show in the line of the time of Covid-19 events. The recording of information about the spread of the pandemic started last December, which means that the bars should be in order from December to November. We are also going to flip the bars to see if it will add to its readability.
+
 ```{r}
 covid_eu %>% 
    filter(country %in% c("United_Kingdom", "Germany", "France")) %>% 
@@ -543,14 +530,14 @@ covid_eu %>%
    geom_bar(stat="identity", position = "dodge", color = "black") +
    coord_flip() +
    theme(plot.title = element_text(size = 14, vjust = 2, hjust=0.5)) +
-   labs (title = "total number of infections by months", 
+   labs (title = "total number of infections by month", 
          caption = "Data from: https://www.ecdc.europa.eu/en", 
          x = "month", y = "number of infections") +
    scale_fill_brewer(palette="Set1") + 
    theme(legend.position="bottom") 
 ```
 
-We can present the total number of infections for each month. As the numbers are high we are going to “control” the way the values on the `y` access are going to appear.
+We can present the total number of infections for each month. As the numbers are high we are going to "control" the way the values on the `y` access are going to appear. 
 
 ```{r}
 covid_eu %>% 
@@ -569,7 +556,7 @@ covid_eu %>%
    scale_fill_brewer(palette="Dark2") + 
    theme(legend.position="bottom") 
 ```
-Next, we are going to present the total number of deaths for each of the months since the recording began. Note, that in the code there is a line that is currently set as a comment that allows for the values to appear as texts on the top of the bars. You can go ahead and uncomment this line by removing the hashtag symbol in front of it.
+Next, we are going to present the total number of deaths for each of the months since the recording began. Note, that in the code there is a line that is currently set as a comment that allows for the values to appear as texts on the top of the bars. You can go ahead and uncomment this line by removing the hashtag symbol in front of it.  
 ```{r}
 covid_eu %>% 
    filter(country %in% c("United_Kingdom", "Germany", "France")) %>% 
@@ -628,6 +615,7 @@ ggplot(my_map) +
 ```{r}
 DT::datatable(my_map)
 ```
+
 
 With the `tmap` package, thematic maps can be generated with great effectiveness presenting several layers of information. The syntax is similar to the one adopted in `ggplot`. Motivation and the explanation of this package has been proposed and published in the article [tmap: Thematic Maps in R](https://www.jstatsoft.org/article/view/v084i06). 
 
