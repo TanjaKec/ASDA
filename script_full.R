@@ -39,9 +39,9 @@ covid_world <- read_excel(tf)
 #set up the database connection to work on `covid_world` data.
 SQLcon <- dbConnect(RSQLite::SQLite(), ":memory:")
 dbWriteTable(SQLcon, "covid", covid_world, overwrite=TRUE)
-```
 
-#see what tables do we have in our database?
+
+#see what tables are in the database
 dbListTables(SQLcon)
 
 #list the fields in a table: 
@@ -69,7 +69,7 @@ dbFetch(
                   group by continentExp"))
 
 
-#declare covid as a `tbl` for use with `dplyr`; call it `covid_ecdc` to avoid any confusion. 
+#declare covid as a `tbl` for use with `dplyr`; call it `covid_ecdc` to avoid any confusion 
 covid_ecdc <- tbl(SQLcon, "covid")
 
 #glance at data set structure to find out how information it containers is structured
@@ -81,12 +81,12 @@ covid_ecdc %>%
 head(covid_ecdc %>% 
        select(countriesAndTerritories, continentExp)) # returns first six rows of the vector, i.e. tibble
 
-#the counts of entries for each continent.
+#the counts of entries for each continent
 covid_ecdc %>% 
   group_by(continentExp) %>% 
   tally()
   
-#look for the number of entries for the UK.
+#look for the number of entries for the UK
 covid_ecdc %>%
   filter(countriesAndTerritories == "United_Kingdom") %>%
   tally()
@@ -100,7 +100,7 @@ tt <- covid_ecdc %>%
 
 DT::datatable(data.frame(tt))
 
-
+# -----------------------
 ## Tidying Data
 
 #select European countries and Turkey
@@ -110,7 +110,7 @@ covid_eu <- rbind(covid_world %>% filter(continentExp == "Europe"),
 DT::datatable(covid_eu)
 
 
-#try to pull the data from the server into R's memory and by using `dplyr` functions do required manipulations.  
+#pull the data from the server into R's memory and do required manipulations  
 #covid_eu <- covid_ecdc %>% 
 #  filter(continentExp == "Europe") %>% 
 #  collect()
@@ -177,7 +177,7 @@ fig <- fig %>% layout(xaxis = x)
 fig
 
 
-#The plot: dynamic changes based on the $F(x)$ created using the `ggplot2` package
+#The plot: dynamic changes based on the F(x) 
 covid_uk %>% 
   ggplot(aes(x = dateRep, y = total_cases)) +
   geom_bar(stat="identity", fill = "#00688B") + 
@@ -191,7 +191,7 @@ covid_uk %>%
   theme(legend.position="none") 
 
 
-# using the line plot; integrats interactivity in display by using the `ggplotly()` function
+# using the line plot; integrates interactivity (`ggplotly()`) 
 pl1 <- covid_uk %>% 
   ggplot(aes(x = dateRep, y = total_cases)) +
   geom_line() + geom_point(col = "#00688B") +
@@ -220,7 +220,7 @@ pl_log <- covid_uk %>%
 pl_log
 
 
-#presents several plots next to each other using the`plot_grid()` function from the `cowplot` package  
+#present several plots next to each other using the`plot_grid()` function from the `cowplot` package  
 plot_grid(pl1, pl_log)
 
 
@@ -268,7 +268,7 @@ covid_eu %>%
   theme(axis.text.x = element_text(angle = 45)) 
 
 
-#plot the change to the acceleration in relaion to the governmental measures.
+#plot the change in the acceleration in relation to the governmental measures
 covid_uk %>% 
   filter(!is.na(second_der)) %>% 
   ggplot(aes(x = dateRep, y = second_der)) +
@@ -302,7 +302,7 @@ sdde <- sec_der_plot(covid_de)
 ggplotly(sdde)
 
 
-#visualise a comparison between those three countries of total number of deaths month by month.
+#visualise a comparison between these three countries of the total number of deaths month by month
 covid_eu %>% 
    filter(country %in% c("United_Kingdom", "Germany", "France")) %>% 
    mutate(mon = month(dateRep, label = TRUE, abbr = TRUE)) %>% 
@@ -319,7 +319,7 @@ covid_eu %>%
 
 
 #the same comparison for the total number of infections
-#the spread of the pandemic started last December
+#the spread of the pandemic has started last December
 covid_eu %>% 
   filter(country %in% c("United_Kingdom", "Germany", "France")) %>% 
   mutate(mon = month(dateRep, label = TRUE, abbr = TRUE)) %>% 
@@ -354,7 +354,7 @@ covid_eu %>%
   scale_fill_brewer(palette="Dark2") + 
   theme(legend.position="bottom") 
 
-#the total number of deaths for each of the months 
+#the total number of deaths for each month 
 covid_eu %>% 
   filter(country %in% c("United_Kingdom", "Germany", "France")) %>% 
   mutate(mon = month(dateRep, label = TRUE, abbr = TRUE)) %>% 
@@ -374,8 +374,9 @@ covid_eu %>%
 # ------------------------------------------
 ## Spatial Visualisation
 
-# a choropleth: colours the EU countries according to the most current value of cumulative numbers for 14 days of COVID-19 cases per 100000
-#pointed to the shape file
+# a choropleth: colours the EU countries according to the most current value 
+# of cumulative numbers for 14 days of COVID-19 cases per 100000
+#points to the shape file
 bound <- "shapes/eu_countries_simplified.shp"
 
 #used the st_read() function to import it
@@ -390,7 +391,7 @@ covid_EU <- covid_eu %>%
 
 
 # tidy up
-# - Making country names to correspond to ecdc data 
+# Make the country names correspond to ecdc data 
 bound$country <- gsub(" ", "_", bound$country)
 bound <- bound %>% 
   mutate(country = fct_recode(country,
@@ -401,6 +402,7 @@ bound <- bound %>%
 my_map <- left_join(bound, covid_EU,
                     by = c("country" = "country"))
 
+# plot the choropleth
 ggplot(my_map) +
   geom_sf(aes(fill = Fx14dper100K)) +
   scale_fill_distiller(direction = 1, name = "Fx14per100K") +
@@ -409,13 +411,12 @@ ggplot(my_map) +
 # have a look at the joined data
 DT::datatable(my_map)
 
-# same using the `tmap` package
-
+# the same using the `tmap` package
 my_map <- my_map %>% 
-  #  filter(!is.na(Fx14dper100K)) %>% 
   mutate(ln_deaths = log(deaths)^10)
 
 tmap_mode(mode =  "view")
+
 tm_shape(my_map) +
   tm_polygons("Fx14dper100K", 
               id = "country", 
@@ -429,5 +430,4 @@ tm_shape(my_map) +
 
 
 #disconnect from the database. 
-
 dbDisconnect(SQLcon)
