@@ -580,7 +580,7 @@ covid_eu %>%
 We will create a choropleth in which we will colour the EU countries according to the most current value of cumulative numbers for 14 days of COVID-19 cases per 100000. To do this we will use the shape file onto which we will superimpose this value as a colour of the polygon, i.e. country. 
 
 ```{r}
-#pointed to the shape file
+#points to the shape file
 bound <- "shapes/eu_countries_simplified.shp"
 
 #used the st_read() function to import it
@@ -595,7 +595,7 @@ covid_EU <- covid_eu %>%
 
 
 # tidy up
-# - Making country names to correspond to ecdc data 
+# make the country names correspond to ecdc data 
 bound$country <- gsub(" ", "_", bound$country)
 bound <- bound %>% 
   mutate(country = fct_recode(country,
@@ -623,10 +623,10 @@ If you are interested in learning more about creating maps in R check the online
 
 ```{r, echo = FALSE}
 my_map <- my_map %>% 
-  #  filter(!is.na(Fx14dper100K)) %>% 
   mutate(ln_deaths = log(deaths)^10)
 
 tmap_mode(mode =  "view")
+
 tm_shape(my_map) +
   tm_polygons("Fx14dper100K", 
               id = "country", 
