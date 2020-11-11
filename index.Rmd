@@ -165,7 +165,7 @@ suppressPackageStartupMessages(library(tmap))
 suppressPackageStartupMessages(library(tmaptools))
 
 
-url2ecdc <- url2 <- "https://www.ecdc.europa.eu/sites/default/files/documents/COVID-19-geographic-disbtribution-worldwide-2020-11-11.xlsx"
+url2ecdc <- "https://www.ecdc.europa.eu/sites/default/files/documents/COVID-19-geographic-disbtribution-worldwide-2020-11-11.xlsx"
 suppressMessages(GET(url2ecdc, write_disk(tf <- tempfile(fileext = ".xlsx"))))
 covid_world <- read_excel(tf)
 ```
