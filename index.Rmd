@@ -168,7 +168,7 @@ suppressPackageStartupMessages(library(tmap))
 suppressPackageStartupMessages(library(tmaptools))
 
 
-url2ecdc <- "https://www.ecdc.europa.eu/sites/default/files/documents/COVID-19-geographic-disbtribution-worldwide-2020-11-11.xlsx"
+url2ecdc <- "https://www.ecdc.europa.eu/sites/default/files/documents/COVID-19-geographic-disbtribution-worldwide-2020-11-12.xlsx"
 suppressMessages(GET(url2ecdc, write_disk(tf <- tempfile(fileext = ".xlsx"))))
 covid_world <- read_excel(tf)
 ```
@@ -517,7 +517,7 @@ covid_eu %>%
    theme(legend.position="bottom") 
 ```
 
-We can make the same kind of comparisons for the total number of infections. But, before we just copy/paste and make an adjustment for `y` access, note that the order of the months does not show in the line of the time of Covid-19 events. The recording of information about the spread of the pandemic started last December, which means that the bars should be in order from December to November. We are also going to flip the bars to see if it will add to its readability.
+We can make the same kind of comparisons for the total number of infections. But, before we just copy/paste and make an adjustment for `y` access, note that the order of the months does not show in the timeline of covid events. The recording of information about the spread of the pandemic started last December, which means that the bars should be in order from December to November. We are also going to flip the bars to see if it will add to its readability.
 
 ```{r}
 covid_eu %>% 
