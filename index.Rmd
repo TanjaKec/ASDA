@@ -168,7 +168,7 @@ suppressPackageStartupMessages(library(tmap))
 suppressPackageStartupMessages(library(tmaptools))
 
 
-url2ecdc <- "https://www.ecdc.europa.eu/sites/default/files/documents/COVID-19-geographic-disbtribution-worldwide-2020-11-14.xlsx"
+url2ecdc <- "https://www.ecdc.europa.eu/sites/default/files/documents/COVID-19-geographic-disbtribution-worldwide-2020-11-15.xlsx"
 suppressMessages(GET(url2ecdc, write_disk(tf <- tempfile(fileext = ".xlsx"))))
 covid_world <- read_excel(tf)
 ```
@@ -463,7 +463,7 @@ covid_uk %>%
   ggplot(aes(x = dateRep, y = second_der)) +
   geom_line() + geom_point(col = "#00688B") +
   xlab("") + ylab("") +
-  labs (title = "2nd derivative of F(x) for SR", 
+  labs (title = "2nd derivative of F(x) for the UK", 
         caption = "Data from: https://www.ecdc.europa.eu") +
   theme_minimal() +
   theme(plot.title = element_text(size = 14, vjust = 2, hjust=0.5),
