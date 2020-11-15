@@ -31,7 +31,7 @@ suppressPackageStartupMessages(library(tmap))
 suppressPackageStartupMessages(library(tmaptools))
 
 ###
-url2ecdc <- "https://www.ecdc.europa.eu/sites/default/files/documents/COVID-19-geographic-disbtribution-worldwide-2020-11-11.xlsx"
+url2ecdc <- "https://www.ecdc.europa.eu/sites/default/files/documents/COVID-19-geographic-disbtribution-worldwide-2020-11-15.xlsx"
 suppressMessages(GET(url2ecdc, write_disk(tf <- tempfile(fileext = ".xlsx"))))
 covid_world <- read_excel(tf)
 
@@ -274,7 +274,7 @@ covid_uk %>%
   ggplot(aes(x = dateRep, y = second_der)) +
   geom_line() + geom_point(col = "#00688B") +
   xlab("") + ylab("") +
-  labs (title = "2nd derivative of F(x) for SR", 
+  labs (title = "2nd derivative of F(x) for the UK", 
         caption = "Data from: https://www.ecdc.europa.eu") +
   theme_minimal() +
   theme(plot.title = element_text(size = 14, vjust = 2, hjust=0.5),
@@ -314,8 +314,8 @@ covid_eu %>%
    labs (title = "total number of deaths by month", 
          caption = "Data from: https://www.ecdc.europa.eu/en", 
          x = "month", y = "number of deaths") +
-   scale_fill_brewer(palette="Paired") + 
-   theme(legend.position="bottom") 
+   scale_fill_brewer(palette = "Paired") + 
+   theme(legend.position = "bottom") 
 
 
 #the same comparison for the total number of infections
@@ -333,8 +333,8 @@ covid_eu %>%
   labs (title = "total number of infections by month", 
         caption = "Data from: https://www.ecdc.europa.eu/en", 
         x = "month", y = "number of infections") +
-  scale_fill_brewer(palette="Set1") + 
-  theme(legend.position="bottom") 
+  scale_fill_brewer(palette = "Set1") + 
+  theme(legend.position = "bottom") 
 
 
 #the total number of infections for each month
@@ -351,8 +351,8 @@ covid_eu %>%
   labs (title = "total number of infections each month", 
         caption = "Data from: https://www.ecdc.europa.eu/en", 
         x = "month", y = "number of deaths") +
-  scale_fill_brewer(palette="Dark2") + 
-  theme(legend.position="bottom") 
+  scale_fill_brewer(palette = "Dark2") + 
+  theme(legend.position = "bottom") 
 
 #the total number of deaths for each month 
 covid_eu %>% 
@@ -368,8 +368,8 @@ covid_eu %>%
   labs (title = "total number of deaths each month", 
         caption = "Data from: https://www.ecdc.europa.eu/en", 
         x = "month", y = "number of cases") +
-  scale_fill_brewer(palette="Accent") + 
-  theme(legend.position="bottom") 
+  scale_fill_brewer(palette = "Accent") + 
+  theme(legend.position = "bottom") 
 
 # ------------------------------------------
 ## Spatial Visualisation
@@ -406,6 +406,7 @@ my_map <- left_join(bound, covid_EU,
 ggplot(my_map) +
   geom_sf(aes(fill = Fx14dper100K)) +
   scale_fill_distiller(direction = 1, name = "Fx14per100K") +
+  scale_fill_viridis_c(option = "magma", begin = 0.1) +
   labs(title="Cumulative number for 14 days of COVID-19 cases per 100000", caption="Source: ecdc")
 
 # have a look at the joined data
