@@ -56,7 +56,7 @@ Experience has shown that for public health intervention to be successful govern
 
 The importance of hand washing, wearing a mask and social distancing as a tool to limit disease transmission is well recognised, but nonetheless ensuring social distancing especially in densely populated urban areas is still challenging. Well-educated communities are critical for an effective response and for the prevention of local outbreaks. The sharing of factual information that can be understood and trusted by the communities in bringing about a change in their behaviour to implement efficiently desired public health actions is a must. Trust and transparency are fundamental in obtaining absolute public engagement. The publishing of daily figures that can be freely analysed and scrutinised can help in engaging communities and obtaining its willing and continued support in controlling the spread of infection.
 
-## Working with DB in R
+## Working with a DB in R
 
 In big organisations data is often kept in a database and data you wish to access from it might be too large to fit into the memory of your computer. Connecting from R to a database to access the necessary data for an analysis can be very useful, as it allows you to fetch only the chunks needed for the current study. R enables you to access and query a database without having to download the data contained in it. The two most common methods of connection are:
 
@@ -651,3 +651,7 @@ dbDisconnect(SQLcon)
 - [SQL databases and R](https://datacarpentry.org/R-ecology-lesson/05-r-and-databases.html)
 
 - [Book: Interactive web-based data visualization with R, plotly, and shiny](https://plotly-r.com)
+
+---
+
+<p><font color="gray">**Working with a DB in R** section is an adaptation of [the NHS-R Community](https://nhsrcommunity.com/) [**Database Connections in R**](https://nhsrcommunity.com/learn-r/workshops/database-connections-in-r-webinar/) webinar created and run by [Chris Mainey](https://www.mainard.co.uk/)</font></p>.
