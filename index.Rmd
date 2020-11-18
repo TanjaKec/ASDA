@@ -1,7 +1,7 @@
 ---
 title: "Case Study: how to use R"
 author: "Tanja and Neil"
-date: "09/03/2020"
+date: "`r format(Sys.Date(), '%d %B, %Y')`"
 output: 
   html_document:
     theme: yeti
@@ -168,7 +168,7 @@ suppressPackageStartupMessages(library(tmap))
 suppressPackageStartupMessages(library(tmaptools))
 
 
-url2ecdc <- "https://www.ecdc.europa.eu/sites/default/files/documents/COVID-19-geographic-disbtribution-worldwide-2020-11-15.xlsx"
+url2ecdc <- "https://www.ecdc.europa.eu/sites/default/files/documents/COVID-19-geographic-disbtribution-worldwide-2020-11-18.xlsx"
 suppressMessages(GET(url2ecdc, write_disk(tf <- tempfile(fileext = ".xlsx"))))
 covid_world <- read_excel(tf)
 ```
@@ -556,7 +556,9 @@ covid_eu %>%
    scale_fill_brewer(palette="Dark2") + 
    theme(legend.position="bottom") 
 ```
-Next, we are going to present the total number of deaths for each of the months since the recording began. Note, that in the code there is a line that is currently set as a comment that allows for the values to appear as texts on the top of the bars. You can go ahead and uncomment this line by removing the hashtag symbol in front of it.  
+
+Next, we are going to present the total number of deaths for each of the months since the recording began. Note, that in the code there is a line that is currently set as a comment that allows for the values to appear as texts on the top of the bars. You can go ahead and uncomment this line by removing the hashtag symbol in front of it. 
+
 ```{r}
 covid_eu %>% 
    filter(country %in% c("United_Kingdom", "Germany", "France")) %>% 
